@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Hello world!
@@ -26,7 +28,7 @@ public class Crawler
     public static void main( String[] args )
     {
 
-        String url = "https://www.cricbuzz.com/";
+        String url = "https://www.google.com/";
         // Connect to the URL and get the HTML document
         LocalDateTime start = LocalDateTime.now();
         Set<String> visitedLinks = new HashSet<>();
@@ -65,8 +67,16 @@ public class Crawler
             System.out.println("Error in: " + url + ": cause: " + ex.getCause());
         }
 
+        //creating a thread pool using ExecutorService
+        ExecutorService service = Executors.newFixedThreadPool(3);
+
         for(String link : resLinks){
-            getLinks(link, depth+1, visitedLinks);
+            service.execute(new CrawlerTask(link, depth+1, visitedLinks));
+            //getLinks(link, depth+1, visitedLinks);
+        }
+        service.shutdown();
+        while (!service.isTerminated()){
+            // Wait until all threads are finished
         }
     }
 }
